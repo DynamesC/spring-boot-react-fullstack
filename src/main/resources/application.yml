@@ -1,10 +1,10 @@
-spring:
-  profiles:
-    active: @spring.profiles.active@
-
+---
 app:
   datasource:
-    jdbc-url: jdbc:postgresql://localhost:5432/amigoscodedemo
-    username: postgres
+    jdbc-url: "jdbc:postgresql://localhost:5432/projink_demo1"
     password: password
     pool-size: 30
+    username: postgres
+spring:
+  profiles:
+    active: spring.profiles.active

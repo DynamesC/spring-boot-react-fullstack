@@ -18,6 +18,12 @@ public class StudentController {
         this.studentService = studentService;
     }
 
+    @RequestMapping(value = "/api/by-simple-path")
+    @ResponseBody
+    public String getDataFromSimplePath(){
+        return "Data from Simple Path";
+    }
+
     @GetMapping
     public List<Student> getAllStudents() {
         return studentService.getAllStudents();
