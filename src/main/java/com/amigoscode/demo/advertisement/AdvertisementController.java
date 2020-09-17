@@ -14,6 +14,7 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("api/landingpages")
+@CrossOrigin(origins = "*")
 public class AdvertisementController {
 
     private final AdvertisementService advertisementService;
@@ -32,6 +33,12 @@ public class AdvertisementController {
     public int getActionCount(@RequestParam("mac") String mac
             ,@RequestParam("adId") String adId){
         return advertisementService.getActionCount(mac, adId);
+    }
+
+    @GetMapping(value = "/get-ad-detail")
+    @ResponseBody
+    public AdDetail getAdDetail(@RequestParam("adId") String adId) {
+        return advertisementService.getAdDetail(adId);
     }
 
     @RequestMapping(value = "/land", method = RequestMethod.GET)

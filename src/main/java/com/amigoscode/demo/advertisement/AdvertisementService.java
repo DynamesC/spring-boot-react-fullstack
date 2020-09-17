@@ -39,6 +39,10 @@ public class AdvertisementService {
         advertisementDataAccessService.recordLanding(adId, landingPageId, mac);
     }
 
+    AdDetail getAdDetail(String adId){
+        return advertisementDataAccessService.getAdDetail(adId);
+    }
+
 //    void addNewStudent(Student student) {
 //        addNewStudent(null, student);
 //    }

@@ -8,3 +8,10 @@ app:
 spring:
   profiles:
     active: spring.profiles.active
+#server:
+#  ssl:
+#    key-store: www.yunyunshuo.cn.jks
+#    key-store-password: wi4c68i26xy84
+#    key-store-type: pkcs12
+#    key-alias: www.yunyunshuo.cn
+#  port: 8443

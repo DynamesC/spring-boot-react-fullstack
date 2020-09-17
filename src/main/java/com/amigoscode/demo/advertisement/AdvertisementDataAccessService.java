@@ -7,6 +7,8 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -78,6 +80,40 @@ public class AdvertisementDataAccessService {
                 " from recordlanding(?, ?, ?)" ;
         jdbcTemplate.queryForObject(
                 sql, new Object[] { adId, landingPageId, mac}, Boolean.class);
+    }
+
+    AdDetail getAdDetail(String adId){
+        String getScanCountSql = "" +
+                " SELECT count(landing_time)" +
+                " FROM landingRecord" +
+                " WHERE ad_id = ?";
+        int scanCount = jdbcTemplate.queryForObject(
+                getScanCountSql, new Object[] { adId}, Integer.class);
+
+        String getScanCount24HSql = "" +
+                " SELECT count(landing_time)" +
+                " FROM landingRecord" +
+                " WHERE ad_id = ?" +
+                " AND landing_time >= NOW() - interval '1 day'";
+
+        int scanCount24H = jdbcTemplate.queryForObject(
+                getScanCount24HSql, new Object[] { adId}, Integer.class);
+
+        String getLastScanTime = "" +
+                " SELECT max(landing_time)" +
+                " FROM landingrecord" +
+                " WHERE ad_id = ?";
+
+        java.sql.Timestamp lastScanTime = jdbcTemplate.queryForObject(
+                getLastScanTime, new Object[] {adId}, java.sql.Timestamp.class);
+
+        Date date = new Date();
+        date.setTime(lastScanTime.getTime());
+        String lastScanTimeString = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(date);
+
+        return new AdDetail(adId, adId, scanCount, lastScanTimeString, scanCount24H);
+
+
     }
 
 //    @SuppressWarnings("ConstantConditions")
