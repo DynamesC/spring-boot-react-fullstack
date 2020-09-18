@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("api/landingpages")
+@RequestMapping("lp")
 @CrossOrigin(origins = "*")
 public class AdvertisementController {
 
@@ -41,7 +41,7 @@ public class AdvertisementController {
         return advertisementService.getAdDetail(adId);
     }
 
-    @RequestMapping(value = "/land", method = RequestMethod.GET)
+    @RequestMapping(value = "/ld", method = RequestMethod.GET)
     public RedirectView land(@RequestParam("mac") String mac
             ,@RequestParam("adId") String adId
     ) {

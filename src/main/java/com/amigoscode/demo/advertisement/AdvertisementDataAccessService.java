@@ -107,6 +107,10 @@ public class AdvertisementDataAccessService {
         java.sql.Timestamp lastScanTime = jdbcTemplate.queryForObject(
                 getLastScanTime, new Object[] {adId}, java.sql.Timestamp.class);
 
+        if (lastScanTime == null){
+            return new AdDetail(adId, adId, scanCount, "N/A", scanCount24H);
+        }
+
         Date date = new Date();
         date.setTime(lastScanTime.getTime());
         String lastScanTimeString = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(date);
