@@ -1,7 +1,7 @@
 ---
 app:
   datasource:
-    jdbc-url: "jdbc:postgresql://localhost:5432/projink_demo1"
+    jdbc-url: "jdbc:postgresql://localhost:5432/projink_demo1_version2"
     password: password
     pool-size: 30
     username: postgres

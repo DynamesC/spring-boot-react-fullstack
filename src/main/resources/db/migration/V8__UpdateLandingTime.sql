@@ -1,2 +1,0 @@
--- alter table landingrecord
--- alter column landing_time type timestamp using date('20200916') + landing_time;

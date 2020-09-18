@@ -59,7 +59,7 @@ public class AdvertisementDataAccessService {
                 " where" +
                 " device_id = ?" +
                 " and " +
-                " ad_id = ?";
+                " landing_page_id = ?";
         return jdbcTemplate.queryForObject(
                 sql, new Object[] { mac, adId}, Integer.class);
     }
@@ -74,26 +74,26 @@ public class AdvertisementDataAccessService {
                 sql, new Object[] { landingPageId}, String.class);
     }
 
-    void recordLanding(String adId, String landingPageId, String mac){
+    void recordLanding(String adId, String mac){
         String sql = "" +
                 " SELECT *" +
-                " from recordlanding(?, ?, ?)" ;
+                " from recordlanding(?, ?)" ;
         jdbcTemplate.queryForObject(
-                sql, new Object[] { adId, landingPageId, mac}, Boolean.class);
+                sql, new Object[] { adId, mac}, Boolean.class);
     }
 
     AdDetail getAdDetail(String adId){
         String getScanCountSql = "" +
                 " SELECT count(landing_time)" +
                 " FROM landingRecord" +
-                " WHERE ad_id = ?";
+                " WHERE landing_page_id = ?";
         int scanCount = jdbcTemplate.queryForObject(
                 getScanCountSql, new Object[] { adId}, Integer.class);
 
         String getScanCount24HSql = "" +
                 " SELECT count(landing_time)" +
                 " FROM landingRecord" +
-                " WHERE ad_id = ?" +
+                " WHERE landing_page_id = ?" +
                 " AND landing_time >= NOW() - interval '1 day'";
 
         int scanCount24H = jdbcTemplate.queryForObject(
@@ -102,7 +102,7 @@ public class AdvertisementDataAccessService {
         String getLastScanTime = "" +
                 " SELECT max(landing_time)" +
                 " FROM landingrecord" +
-                " WHERE ad_id = ?";
+                " WHERE landing_page_id = ?";
 
         java.sql.Timestamp lastScanTime = jdbcTemplate.queryForObject(
                 getLastScanTime, new Object[] {adId}, java.sql.Timestamp.class);

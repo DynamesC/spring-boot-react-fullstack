@@ -35,8 +35,8 @@ public class AdvertisementService {
         return advertisementDataAccessService.getUrlByLandingPageId(landingPageId);
     }
 
-    void recordLanding(String adId, String landingPageId, String mac){
-        advertisementDataAccessService.recordLanding(adId, landingPageId, mac);
+    void recordLanding(String adId, String mac){
+        advertisementDataAccessService.recordLanding(adId,  mac);
     }
 
     AdDetail getAdDetail(String adId){

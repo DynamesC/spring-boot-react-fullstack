@@ -42,13 +42,12 @@ public class AdvertisementController {
     }
 
     @RequestMapping(value = "/land", method = RequestMethod.GET)
-    public RedirectView land(@RequestParam("landingPageId") String landingPageId
-            ,@RequestParam("mac") String mac
+    public RedirectView land(@RequestParam("mac") String mac
             ,@RequestParam("adId") String adId
     ) {
 
-        advertisementService.recordLanding(adId, landingPageId, mac);
-        String targetUrl = advertisementService.getUrlByLandingPageId(landingPageId);
+        advertisementService.recordLanding(adId, mac);
+        String targetUrl = advertisementService.getUrlByLandingPageId(adId);
         RedirectView redirectView = new RedirectView();
         redirectView.setUrl(targetUrl);
         return redirectView;
