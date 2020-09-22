@@ -17,14 +17,22 @@ public class LandingPage {
     @NotBlank
     private final String description;
 
+    private final String largeDemoId;
+
+    private final String smallDemoId;
+
     public LandingPage(@JsonProperty("landingPageId") String landingPageId,
-                   @JsonProperty("name") String name,
-                   @JsonProperty("url") String url,
-                   @JsonProperty("description") String description) {
+                       @JsonProperty("name") String name,
+                       @JsonProperty("url") String url,
+                       @JsonProperty("description") String description,
+                       @JsonProperty("largeDemoId") String largeDemoId,
+                       @JsonProperty("smallDemoId") String smallDemoId) {
         this.landingPageId = landingPageId;
         this.name = name;
         this.url = url;
         this.description = description;
+        this.smallDemoId = smallDemoId;
+        this.largeDemoId = largeDemoId;
     }
 
     public String getLandingPageId() {
@@ -43,6 +51,14 @@ public class LandingPage {
         return description;
     }
 
+    public String getLargeDemoId() {
+        return largeDemoId;
+    }
+
+    public String getSmallDemoId() {
+        return smallDemoId;
+    }
+
     @Override
     public String toString() {
         return "LandingPage{" +
@@ -50,6 +66,8 @@ public class LandingPage {
                 ", name='" + name + '\'' +
                 ", url='" + url + '\'' +
                 ", description='" + description + '\'' +
+                ", smallDemoId='" + smallDemoId + '\'' +
+                ", largeDemoId='" + largeDemoId + '\'' +
                 '}';
     }
 

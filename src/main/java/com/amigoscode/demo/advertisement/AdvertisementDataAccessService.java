@@ -29,7 +29,9 @@ public class AdvertisementDataAccessService {
                 " landing_page_id, " +
                 " name, " +
                 " url, " +
-                " description " +
+                " description," +
+                " small_demo_id," +
+                " large_demo_id " +
                 "FROM LandingPage";
 
         return jdbcTemplate.query(sql, mapLandingPageFromDb());
@@ -182,12 +184,16 @@ public class AdvertisementDataAccessService {
             String name = resultSet.getString("name");
             String url = resultSet.getString("url");
             String description = resultSet.getString("description");
+            String smallDemoId = resultSet.getString("small_demo_id");
+            String largeDemoId = resultSet.getString("large_demo_id");
 
             return new LandingPage(
                     landingPageId,
                     name,
                     url,
-                    description
+                    description,
+                    largeDemoId,
+                    smallDemoId
             );
         };
     }

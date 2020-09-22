@@ -41,11 +41,16 @@ public class AdvertisementController {
         return advertisementService.getAdDetail(adId);
     }
 
+    @GetMapping(value = "/get-ad-list")
+    @ResponseBody
+    public List<LandingPage> getAdList() {
+        return advertisementService.getAllLandingPages();
+    }
+
     @RequestMapping(value = "/ld", method = RequestMethod.GET)
     public RedirectView land(@RequestParam("mac") String mac
             ,@RequestParam("adId") String adId
     ) {
-
         advertisementService.recordLanding(adId, mac);
         String targetUrl = advertisementService.getUrlByLandingPageId(adId);
         RedirectView redirectView = new RedirectView();
