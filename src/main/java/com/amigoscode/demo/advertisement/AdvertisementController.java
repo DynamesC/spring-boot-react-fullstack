@@ -47,6 +47,17 @@ public class AdvertisementController {
         return advertisementService.getAllLandingPages();
     }
 
+    @GetMapping(value = "/get-label-detail")
+    @ResponseBody
+    public LabelDetail getLabelDetail(@RequestParam("mac") String mac) {return advertisementService.getLabelDetail(mac);}
+
+    @GetMapping(value = "/update-device-name")
+    @ResponseBody
+    public Boolean updateDeviceName(@RequestParam("mac") String mac,
+                                    @RequestParam("newName") String newName){
+        return advertisementService.updateDeviceName(mac, newName);
+    }
+
     @RequestMapping(value = "/ld", method = RequestMethod.GET)
     public RedirectView land(@RequestParam("mac") String mac
             ,@RequestParam("adId") String adId

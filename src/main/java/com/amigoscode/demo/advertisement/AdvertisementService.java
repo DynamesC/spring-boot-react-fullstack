@@ -43,6 +43,10 @@ public class AdvertisementService {
         return advertisementDataAccessService.getAdDetail(adId);
     }
 
+    LabelDetail getLabelDetail(String mac){return advertisementDataAccessService.getLabelDetail(mac);}
+
+    Boolean updateDeviceName(String mac, String newName){return advertisementDataAccessService.updateDeviceName(mac, newName);}
+
 //    void addNewStudent(Student student) {
 //        addNewStudent(null, student);
 //    }

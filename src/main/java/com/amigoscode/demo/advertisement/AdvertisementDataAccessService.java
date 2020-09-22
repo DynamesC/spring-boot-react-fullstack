@@ -122,6 +122,34 @@ public class AdvertisementDataAccessService {
 
     }
 
+    LabelDetail getLabelDetail(String mac){
+        String sql = "" +
+                "SELECT " +
+                " mac, " +
+                " name, " +
+                " device.site_id, " +
+                " site_name" +
+                " FROM device join site" +
+                " on device.site_id = site.site_id"+
+                " where mac = ?";
+
+        return (LabelDetail) jdbcTemplate.queryForObject(sql, new Object[] { mac }, mapLabelDetailFromDb());
+    }
+
+    Boolean updateDeviceName(String mac, String newName){
+        try{
+            String sql = "" +
+                    " update device" +
+                    " set name = ?" +
+                    " where mac = ?";
+            jdbcTemplate.update(sql, new Object[] {newName, mac});
+            return true;
+        }catch (Exception e){
+            e.printStackTrace();
+            return false;
+        }
+    }
+
 //    @SuppressWarnings("ConstantConditions")
 //    boolean isEmailTaken(String email) {
 //        String sql = "" +
@@ -194,6 +222,22 @@ public class AdvertisementDataAccessService {
                     description,
                     largeDemoId,
                     smallDemoId
+            );
+        };
+    }
+
+    private RowMapper<LabelDetail> mapLabelDetailFromDb() {
+        return (resultSet, i) -> {
+            String mac = resultSet.getString("mac");
+            String name = resultSet.getString("name");
+            String site_id = resultSet.getString("site_id");
+            String site_name = resultSet.getString("site_name");
+
+            return new LabelDetail(
+                    mac,
+                    name,
+                    site_id,
+                    site_name
             );
         };
     }
