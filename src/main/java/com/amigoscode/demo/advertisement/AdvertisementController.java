@@ -47,6 +47,12 @@ public class AdvertisementController {
         return advertisementService.getAllLandingPages();
     }
 
+    @GetMapping(value = "/get-site-list")
+    @ResponseBody
+    public List<SiteDetail> getSiteList() {
+        return advertisementService.getAllSiteDetails();
+    }
+
     @GetMapping(value = "/get-label-detail")
     @ResponseBody
     public LabelDetail getLabelDetail(@RequestParam("mac") String mac) {return advertisementService.getLabelDetail(mac);}
@@ -56,6 +62,25 @@ public class AdvertisementController {
     public Boolean updateDeviceName(@RequestParam("mac") String mac,
                                     @RequestParam("newName") String newName){
         return advertisementService.updateDeviceName(mac, newName);
+    }
+
+    @GetMapping(value = "/create-new-site")
+    @ResponseBody
+    public Boolean createNewSite(@RequestParam("site_name") String siteName){
+        return advertisementService.createNewSite(siteName);
+    }
+
+    @GetMapping(value = "/delete-site")
+    @ResponseBody
+    public Boolean deleteSite(@RequestParam("site_id") String siteId){
+        return advertisementService.deleteSite(siteId);
+    }
+
+    @GetMapping(value = "/device-change-site")
+    @ResponseBody
+    public Boolean deviceChangeSite(@RequestParam("site_id") String siteId,
+                                    @RequestParam("mac") String mac){
+        return advertisementService.deviceChangeSite(mac, siteId);
     }
 
     @RequestMapping(value = "/ld", method = RequestMethod.GET)
@@ -68,6 +93,7 @@ public class AdvertisementController {
         redirectView.setUrl(targetUrl);
         return redirectView;
     }
+
 
 //    @GetMapping(path = "{studentId}/courses")
 //    public List<StudentCourse> getAllCoursesForStudent(

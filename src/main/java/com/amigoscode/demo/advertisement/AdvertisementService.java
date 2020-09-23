@@ -27,6 +27,10 @@ public class AdvertisementService {
         return advertisementDataAccessService.selectAllLandingPage();
     }
 
+    List<SiteDetail> getAllSiteDetails(){
+        return advertisementDataAccessService.getAllSiteDetails();
+    }
+
     int getActionCount(String mac, String adId){
         return advertisementDataAccessService.getActionCount(mac, adId);
     }
@@ -46,6 +50,12 @@ public class AdvertisementService {
     LabelDetail getLabelDetail(String mac){return advertisementDataAccessService.getLabelDetail(mac);}
 
     Boolean updateDeviceName(String mac, String newName){return advertisementDataAccessService.updateDeviceName(mac, newName);}
+
+    Boolean createNewSite(String siteName){return advertisementDataAccessService.createNewSite(siteName);}
+
+    Boolean deleteSite(String siteId){return advertisementDataAccessService.deleteSite(siteId);}
+
+    Boolean deviceChangeSite(String mac, String siteId){return advertisementDataAccessService.deviceChangeSite(mac, siteId);}
 
 //    void addNewStudent(Student student) {
 //        addNewStudent(null, student);

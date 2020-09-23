@@ -37,6 +37,18 @@ public class AdvertisementDataAccessService {
         return jdbcTemplate.query(sql, mapLandingPageFromDb());
     }
 
+    List<SiteDetail> getAllSiteDetails(){
+        String sql = "" +
+                "SELECT s.site_id, s.site_name, count(distinct d.mac) as device_count, count(distinct l.landing_record_id) as scan_count " +
+                " from site s full join device d on s.site_id = d.site_id " +
+                " full join landingrecord l on d.mac = l.device_id " +
+                " group by s.site_id ";
+
+        return jdbcTemplate.query(sql, mapSiteDetailFromDb());
+
+    }
+
+
     int insertLandingPage(String landingPageId, LandingPage landingPage) {
         String sql = "" +
                 "INSERT INTO student (" +
@@ -150,6 +162,54 @@ public class AdvertisementDataAccessService {
         }
     }
 
+    Boolean createNewSite(String siteName){
+        try{
+            String sql = "" +
+                    " insert into site values " +
+                    " (LEFT(MD5(RANDOM()::text), 8), ?)" ;
+            jdbcTemplate.update(sql, new Object[] {siteName});
+            return true;
+        }catch (Exception e){
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    Boolean deleteSite(String siteId){
+        try{
+            String sql1 = "" +
+                    " update device " +
+                    " set site_id = 'NULL' " +
+                    " where site_id = ? ";
+
+            jdbcTemplate.update(sql1, new Object[] {siteId});
+
+            String sql2 = "" +
+                    " delete from site " +
+                    " where site_id = ?" ;
+            jdbcTemplate.update(sql2, new Object[] {siteId});
+            return true;
+        }catch (Exception e){
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    Boolean deviceChangeSite(String mac, String siteId){
+        try{
+            String sql1 = "" +
+                    " update device " +
+                    " set site_id = ? " +
+                    " where mac = ? ";
+
+            jdbcTemplate.update(sql1, new Object[] {siteId, mac});
+            return true;
+        }catch (Exception e){
+            e.printStackTrace();
+            return false;
+        }
+    }
+
 //    @SuppressWarnings("ConstantConditions")
 //    boolean isEmailTaken(String email) {
 //        String sql = "" +
@@ -238,6 +298,22 @@ public class AdvertisementDataAccessService {
                     name,
                     site_id,
                     site_name
+            );
+        };
+    }
+
+    private RowMapper<SiteDetail> mapSiteDetailFromDb() {
+        return (resultSet, i) -> {
+            String site_id = resultSet.getString("site_id");
+            String site_name = resultSet.getString("site_name");
+            int device_count = resultSet.getInt("device_count");
+            int scan_count = resultSet.getInt("scan_count");
+
+            return new SiteDetail(
+                    site_id,
+                    site_name,
+                    device_count,
+                    scan_count
             );
         };
     }
