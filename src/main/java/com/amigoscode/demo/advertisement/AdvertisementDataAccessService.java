@@ -210,6 +210,21 @@ public class AdvertisementDataAccessService {
         }
     }
 
+    Boolean updateSiteName(String siteId, String name){
+        try{
+            String sql1 = "" +
+                    " update site " +
+                    " set site_name = ? " +
+                    " where site_id = ? ";
+
+            jdbcTemplate.update(sql1, new Object[] {name, siteId});
+            return true;
+        }catch (Exception e){
+            e.printStackTrace();
+            return false;
+        }
+    }
+
 //    @SuppressWarnings("ConstantConditions")
 //    boolean isEmailTaken(String email) {
 //        String sql = "" +

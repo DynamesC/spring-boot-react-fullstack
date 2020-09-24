@@ -64,6 +64,13 @@ public class AdvertisementController {
         return advertisementService.updateDeviceName(mac, newName);
     }
 
+    @GetMapping(value = "/update-site-name")
+    @ResponseBody
+    public Boolean updateSiteName(@RequestParam("site_id") String siteId,
+                                    @RequestParam("name") String name){
+        return advertisementService.updateSiteName(siteId, name);
+    }
+
     @GetMapping(value = "/create-new-site")
     @ResponseBody
     public Boolean createNewSite(@RequestParam("site_name") String siteName){
@@ -93,7 +100,6 @@ public class AdvertisementController {
         redirectView.setUrl(targetUrl);
         return redirectView;
     }
-
 
 //    @GetMapping(path = "{studentId}/courses")
 //    public List<StudentCourse> getAllCoursesForStudent(

@@ -57,6 +57,8 @@ public class AdvertisementService {
 
     Boolean deviceChangeSite(String mac, String siteId){return advertisementDataAccessService.deviceChangeSite(mac, siteId);}
 
+    Boolean updateSiteName(String siteId, String name){return advertisementDataAccessService.updateSiteName(siteId, name);}
+
 //    void addNewStudent(Student student) {
 //        addNewStudent(null, student);
 //    }
