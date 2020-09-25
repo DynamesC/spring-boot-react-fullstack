@@ -8,6 +8,7 @@ app:
 spring:
   profiles:
     active: spring.profiles.active
+
 #server:
 #  ssl:
 #    key-store: www.yunyunshuo.cn.jks
