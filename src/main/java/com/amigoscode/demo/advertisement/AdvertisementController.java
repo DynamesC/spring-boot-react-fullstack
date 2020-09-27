@@ -3,8 +3,12 @@ package com.amigoscode.demo.advertisement;
 import com.amigoscode.demo.student.Student;
 import com.amigoscode.demo.student.StudentCourse;
 import com.amigoscode.demo.student.StudentService;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.servlet.view.RedirectView;
 
 import javax.servlet.http.HttpServletResponse;
@@ -23,6 +27,32 @@ public class AdvertisementController {
     public AdvertisementController(AdvertisementService advertisementService) {
         this.advertisementService = advertisementService;
     }
+
+//    @Scheduled(fixedRate=43200000)
+//    public void fetchESLToken() {
+//        final String uri = "http://esl.ylwlesl.com:9191/V1/Login";
+//
+//        RestTemplate restTemplate = new RestTemplate();
+//
+//        String reqBody = "{\n" +
+//                "    \"username\": \"zjwlk123\",\n" +
+//                "    \"password\": \"123456\"\n" +
+//                "}";
+//        String result = restTemplate.postForObject(uri, reqBody, String.class);
+//
+//        // convert your result into json
+//
+//        JSONObject jsonResponse;
+//        try {
+//            jsonResponse = new JSONObject(result);
+//            System.out.println(jsonResponse.toString());
+//        } catch (JSONException e) {
+//            e.printStackTrace();
+//        }
+//        //extract a value "name" from your json data:
+//
+//    }
+
 
     @GetMapping
     public List<LandingPage> getAllLandingPages() {

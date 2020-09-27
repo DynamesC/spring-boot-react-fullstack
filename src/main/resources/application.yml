@@ -8,8 +8,15 @@ app:
 spring:
   profiles:
     active: spring.profiles.active
+  jpa:
+    properties:
+      hibernate:
+        temp:
+          use_jdbc_metadata_defaults: false
+        jdbc:
+          lob:
+            non_contextual_creation: true
 
-#server:
 #  ssl:
 #    key-store: www.yunyunshuo.cn.jks
 #    key-store-password: wi4c68i26xy84
