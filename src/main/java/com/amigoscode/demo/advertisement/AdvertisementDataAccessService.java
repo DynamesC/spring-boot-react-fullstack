@@ -39,7 +39,7 @@ public class AdvertisementDataAccessService {
 
     List<SiteDetail> getAllSiteDetails(){
         String sql = "" +
-                "SELECT s.site_id, s.site_name, count(distinct d.mac) as device_count, count(distinct l.landing_record_id) as scan_count " +
+                "SELECT s.site_id , s.site_name, count(distinct d.mac) as device_count, count(distinct l.landing_record_id) as scan_count " +
                 " from site s full join device d on s.site_id = d.site_id " +
                 " full join landingrecord l on d.mac = l.device_id " +
                 " group by s.site_id ";
@@ -218,6 +218,31 @@ public class AdvertisementDataAccessService {
                     " where site_id = ? ";
 
             jdbcTemplate.update(sql1, new Object[] {name, siteId});
+            return true;
+        }catch (Exception e){
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    Boolean isDeviceInDB(String mac){
+        String sql = "" +
+                " SELECT COUNT (mac)" +
+                " from device" +
+                " where" +
+                " mac = ?" ;
+        int count =  jdbcTemplate.queryForObject(
+                sql, new Object[] { mac}, Integer.class);
+
+        return count != 0;
+    }
+
+    Boolean recordNewDevice(String mac){
+        try{
+            String sql = "" +
+                    " insert into device values " +
+                    " (?, '', 'NULL')" ;
+            jdbcTemplate.update(sql, new Object[] {mac});
             return true;
         }catch (Exception e){
             e.printStackTrace();

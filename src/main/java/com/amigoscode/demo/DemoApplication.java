@@ -27,7 +27,7 @@ public class DemoApplication {
         SpringApplication.run(DemoApplication.class, args);
     }
 
-    @Scheduled(fixedRate=43200000)
+    @Scheduled(fixedRate = 300000)
     public static void fetchESLToken() {
         final String uri = "http://esl.ylwlesl.com:9191/V1/Login";
 

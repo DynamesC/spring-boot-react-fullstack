@@ -59,6 +59,10 @@ public class AdvertisementService {
 
     Boolean updateSiteName(String siteId, String name){return advertisementDataAccessService.updateSiteName(siteId, name);}
 
+    public Boolean isDeviceInDB(String mac){return advertisementDataAccessService.isDeviceInDB(mac);}
+
+    public Boolean recordNewDevice(String mac){return advertisementDataAccessService.recordNewDevice(mac);}
+
 //    void addNewStudent(Student student) {
 //        addNewStudent(null, student);
 //    }
