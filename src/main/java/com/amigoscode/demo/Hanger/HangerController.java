@@ -36,6 +36,12 @@ public class HangerController {
         return hangerService.queryTotalCount();
     }
 
+    @GetMapping(value = "/label/query")
+    @ResponseBody
+    public TotalCountsResponse queryLabels() {
+        return hangerService.queryTotalCount();
+    }
+
     @PostMapping(value = "/product/create")
     Boolean createProduct(@Valid @RequestBody HangerProduct product) {
         return hangerService.createProduct(product);
@@ -57,5 +63,7 @@ public class HangerController {
     public List<HangerTemplate> queryTemplates() {
         return hangerService.queryTemplates();
     }
+
+
 
 }
