@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+import java.util.HashMap;
+import java.util.Map;
 
 public class HangerProduct {
     @NotNull
@@ -199,6 +201,32 @@ public class HangerProduct {
                 ", currentPrice='" + currentPrice + '\'' +
                 ", templateId='" + templateId + '\'' +
                 '}';
+    }
+
+    public Map<String, Object> toBodyMap(){
+        Map<String, Object> body = new HashMap<>();
+        body.put("pc", getBarcode());
+        body.put("f1", getSku());
+        body.put("pn", getName());
+        body.put("f2", getSize());
+        body.put("pop", getOriginalPrice());
+        body.put("pp", getCurrentPrice());
+        body.put("f3", getBarcodeText());
+        body.put("pqr", getQrcode());
+        body.put("f4", getQrcodeText());
+        body.put("kc", getStock());
+        body.put("f5", getR1());
+        body.put("f6", getR2());
+        body.put("f7", getR3());
+        body.put("f8", getR4());
+        body.put("f9", getR5());
+        body.put("f10", getR6());
+        body.put("f11", getR7());
+        body.put("f12", getR8());
+        body.put("f13", getR9());
+        body.put("f14", getR10());
+
+        return body;
     }
 
 

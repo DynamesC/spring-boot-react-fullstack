@@ -2,8 +2,10 @@ package com.amigoscode.demo.Hanger;
 
 import com.amigoscode.demo.Hanger.DAO.HangerProduct;
 import com.amigoscode.demo.Hanger.DAO.HangerTemplate;
+import com.amigoscode.demo.Hanger.Request.CreateTemplateRequest;
 import com.amigoscode.demo.Hanger.Request.RemoveProductsRequest;
 import com.amigoscode.demo.Hanger.Request.UpdateHangerProductRequest;
+import com.amigoscode.demo.Hanger.Request.UpdateTemplateRequest;
 import com.amigoscode.demo.Hanger.Response.TotalCountsResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -29,6 +31,7 @@ public class HangerDataAccessService {
         String sql = "" +
                 " SELECT p.*, t.name as template_name" +
                 " FROM HangerProduct p JOIN HangerLabelTemplate t ON p.template_id = t.template_id "+
+                " where p.barcode != \'UNKNOWN\'" +
                 " ORDER BY create_time" +
                 " OFFSET ? ROWS" +
                 " FETCH FIRST ? ROWS ONLY ";
@@ -36,12 +39,47 @@ public class HangerDataAccessService {
         return jdbcTemplate.query(sql, new Object[] {startIndex, endIndex - startIndex}, mapHangerProductFromDB());
     }
 
+    public List<HangerProduct> queryProductsByTemplateId(String templateId){
+        String sql = "" +
+                " SELECT p.*, t.name as template_name" +
+                " FROM HangerProduct p JOIN HangerLabelTemplate t ON p.template_id = t.template_id "+
+                " where t.template_id = ?" ;
+
+        return jdbcTemplate.query(sql, new Object[] {templateId}, mapHangerProductFromDB());
+    }
+
+    public HangerProduct queryProduct(String barcode){
+        try{
+            String sql = "" +
+                    " SELECT p.*, t.name as template_name" +
+                    " FROM HangerProduct p JOIN HangerLabelTemplate t ON p.template_id = t.template_id "+
+                    " where p.barcode = ?";
+            return jdbcTemplate.queryForObject(sql, new Object[]{barcode}, mapHangerProductFromDB());
+        }catch (Exception e){
+            e.printStackTrace();
+            return null;
+        }
+
+    }
+
     public List<HangerTemplate> queryTemplates(){
+
         String sql = "" +
                 " SELECT *" +
-                " FROM HangerLabelTemplate";
+                " FROM HangerLabelTemplate" +
+                " where template_id != \'UNKNOWN\'";
 
         return jdbcTemplate.query(sql,  mapHangerTemplateFromDB());
+
+    }
+
+    public HangerTemplate queryTemplate(String templateId){
+        String sql = "" +
+                " SELECT *" +
+                " FROM HangerLabelTemplate" +
+                " where template_id = ?";
+
+        return jdbcTemplate.queryForObject(sql, new Object[]{templateId}, mapHangerTemplateFromDB());
     }
 
     public TotalCountsResponse queryTotalCount(){
@@ -113,7 +151,31 @@ public class HangerDataAccessService {
             e.printStackTrace();
             return false;
         }
+    }
 
+    Boolean productSwitchTemplate(List<String> barcodes, String templateId){
+        if(barcodes == null || barcodes.size() == 0){
+            return true;
+        }
+
+        String sql = "" +
+                " update hangerproduct" +
+                " set template_id = ?" +
+                " where barcode in (" + "\'"+ barcodes.get(0) + "\'";
+
+        for (int i = 1; i < barcodes.size(); i++) {
+            sql = sql + ", " + "\'" + barcodes.get(i) + "\'";
+        }
+
+        sql = sql + ")";
+
+        try{
+            jdbcTemplate.update(sql, new Object[]{templateId});
+            return true;
+        }catch (Exception e){
+            e.printStackTrace();
+            return false;
+        }
     }
 
     Boolean updateProduct(UpdateHangerProductRequest request){
@@ -144,6 +206,89 @@ public class HangerDataAccessService {
             sql = sql.substring(0, sql.length()-1) + " where barcode = ?";
             System.out.println(sql);
             jdbcTemplate.update(sql, new Object[]{request.getBarcode()});
+            return true;
+        }catch (Exception e){
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    boolean containsLabel(String eslCode){
+        String sql = "select exists(select 1 from hangerlabel where label_id=?)";
+        return jdbcTemplate.queryForObject(sql, new Object[]{eslCode},Boolean.class);
+    }
+
+    boolean containsProduct(String productCode){
+        String sql = "select exists(select 1 from hangerproduct where barcode=?)";
+        return jdbcTemplate.queryForObject(sql, new Object[]{productCode}, Boolean.class);
+    }
+
+    boolean containsTemplate(String templateId){
+        String sql = "select exists(select 1 from HangerLabelTemplate where template_id=?)";
+        return jdbcTemplate.queryForObject(sql, new Object[]{templateId}, Boolean.class);
+    }
+
+    void insertOrUpdateLabel(String eslCode, String productCodeToRecord, String labelType){
+        String sql = " INSERT INTO hangerlabel (label_id, product_barcode, type)" +
+                " VALUES (?, ?, ?::LABELTYPE)" +
+                " ON CONFLICT (label_id) DO UPDATE " +
+                " SET product_barcode = ? ";
+        jdbcTemplate.update(sql, new Object[]{eslCode, productCodeToRecord, labelType, productCodeToRecord});
+    }
+
+    boolean createTemplate(CreateTemplateRequest createTemplateRequest){
+
+        try{
+            String sql = " insert into hangerlabeltemplate values" +
+                    " (LEFT(MD5(RANDOM()::text), 10) ,?,?,?,?,CURRENT_TIMESTAMP)";
+            jdbcTemplate.update(sql, new Object[]{createTemplateRequest.getTemplate_name()
+                    , createTemplateRequest.getNote(), createTemplateRequest.getWl_21r_id(), createTemplateRequest.getWl_21b_id()});
+            return true;
+        }catch (Exception e){
+            e.printStackTrace();
+            return false;
+        }
+
+    }
+
+    boolean updateTemplate(UpdateTemplateRequest request){
+        try{
+            String sql = (
+                    " update HangerLabelTemplate set " +
+                            (request.getTemplate_name() != null ? String.format(" name = \'%s\' ,", request.getTemplate_name()) : "") +
+                            (request.getNote() != null ? String.format(" note = \'%s\' ,", request.getNote()) : "" )+
+                            (request.getWl_21b_id() != null ? String.format(" wl_21b_id = \'%s\' ,", request.getWl_21b_id()) : "") +
+                            (request.getWl_21r_id() != null ? String.format(" wl_21r_id = \'%s\' ,", request.getWl_21r_id()) : "")
+            );
+
+
+            sql = sql.substring(0, sql.length()-1) + " where template_id = ?";
+            System.out.println(sql);
+            jdbcTemplate.update(sql, new Object[]{request.getId()});
+            return true;
+        }catch (Exception e){
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    boolean removeTemplates(List<String> templateIds){
+        if(templateIds == null || templateIds.size() == 0){
+            return true;
+        }
+
+        String sql = "" +
+                " delete from hangerlabeltemplate" +
+                " where template_id in (" + "\'"+ templateIds.get(0) + "\'";
+
+        for (int i = 1; i < templateIds.size(); i++) {
+            sql = sql + ", " + "\'" + templateIds.get(i) + "\'";
+        }
+
+        sql = sql + ") ";
+
+        try{
+            jdbcTemplate.update(sql);
             return true;
         }catch (Exception e){
             e.printStackTrace();
