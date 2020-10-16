@@ -31,4 +31,8 @@ public class BindLabelRequest {
         this.labelCodes = labelCodes;
         this.productBarcode = productBarcode;
     }
+
+    public BindLabelRequest(){
+
+    }
 }

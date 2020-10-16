@@ -19,4 +19,8 @@ public class RemoveProductsRequest {
     public RemoveProductsRequest(@NotNull List<String> barcodes) {
         this.barcodes = barcodes;
     }
+
+    public RemoveProductsRequest(){
+
+    }
 }

@@ -9,7 +9,10 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
+import org.springframework.http.client.ClientHttpRequestFactory;
+import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
@@ -36,7 +39,7 @@ public class HangerController {
     }
 
     @Scheduled(fixedRate = 300000)
-    private void syncProducts(){
+    public void syncProducts(){
 
         int page = 1;
         int size = 10000;
@@ -54,6 +57,14 @@ public class HangerController {
         RestTemplate restTemplate = new RestTemplate();
         MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
         ResponseEntity<String> response = restTemplate.exchange(uri, HttpMethod.GET, new HttpEntity<Object>(headers), String.class);
+
+//        HttpHeaders headers = new HttpHeaders();
+//        Map<String, String> headerContent = new HashMap<>();
+//        headers.setAll(headerContent);
+//        Map<String, Object> body = new HashMap<>();
+//        HttpEntity<Map<String, Object>> entity = new HttpEntity<>(body, headers);
+//
+//        ResponseEntity<String> response = restTemplate.postForEntity(uri, entity, String.class);
 
         List<String> wolinkProductCodes = new ArrayList<>();
 
@@ -86,6 +97,7 @@ public class HangerController {
 
 
     @GetMapping(value = "/product/query")
+    @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
     @ResponseBody
     public List<HangerProduct> queryProducts(@RequestParam("size") int size,
                                          @RequestParam("page") int page) {
@@ -93,12 +105,35 @@ public class HangerController {
     }
 
     @GetMapping(value = "/query_total_counts")
+    @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
     @ResponseBody
     TotalCountsResponse queryTotalCounts() {
-        return hangerService.queryTotalCount();
+        TotalCountsResponse result =  hangerService.queryTotalCount();
+
+        final String uri = String.format("http://n1.wolink.com.cn/api/HZADP/esl/query_count?store_code=%s&sign=%s", storeCode, sign);
+
+        RestTemplate restTemplate = new RestTemplate();
+        MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
+        ResponseEntity<String> response = restTemplate.exchange(uri, HttpMethod.GET, new HttpEntity<Object>(headers), String.class);
+
+        try{
+            JSONObject body = new JSONObject(response.getBody().toString());
+            int online_count = body.getInt("online_count");
+            int offline_count = body.getInt("offline_count");
+            result.setLabelCount(online_count + offline_count);
+        }catch(JSONException e){
+            e.printStackTrace();
+        }
+//        return response;
+
+        //Handle 'UNKNOWN' product and template
+        result.setProductCount(result.getProductCount() -1);
+        result.setTemplateCount(result.getTemplateCount() -1);
+        return result;
     }
 
     @PostMapping(value = "/product/create")
+    @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
     Boolean createProduct(@Valid @RequestBody HangerProduct product) {
         boolean createProductOnWolinkSucceeded = createOrUpdateProductOnWolink(product);
 
@@ -135,6 +170,7 @@ public class HangerController {
     }
 
     @PostMapping(value = "/product/update")
+    @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
     Boolean updateProduct(@Valid @RequestBody UpdateHangerProductRequest updateHangerProductRequest) {
         HangerProduct localProductInfo = hangerService.queryProduct(updateHangerProductRequest.getBarcode());
         if(localProductInfo == null) return false;
@@ -186,6 +222,7 @@ public class HangerController {
     }
 
     @PostMapping(value = "/template/update")
+    @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
     Boolean updateTemplate(@Valid @RequestBody UpdateTemplateRequest updateTemplateRequest) {
         boolean localUpdateSucceeded = hangerService.updateTemplate(updateTemplateRequest);
         if(localUpdateSucceeded){
@@ -205,7 +242,9 @@ public class HangerController {
     }
 
     @PostMapping(value = "/product/remove")
+    @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
     Boolean removeProduct(@Valid @RequestBody RemoveProductsRequest removeProductsRequest) {
+        System.out.println(removeProductsRequest.getBarcodes());
         boolean removeProductOnWolinkSucceeded = removeProductOnWolink(removeProductsRequest);
         if(removeProductOnWolinkSucceeded){
             return removeProductOnLocalDB(removeProductsRequest);
@@ -219,21 +258,41 @@ public class HangerController {
     }
 
     Boolean removeProductOnWolink(RemoveProductsRequest removeProductsRequest){
-        return true;
+        final String uri = "http://n1.wolink.com.cn/api/HZADP/product/deleteMultiple";
+
+        RestTemplate restTemplate = new RestTemplate();
+
+        HttpHeaders headers = new HttpHeaders();
+        Map<String, String> headerContent = new HashMap<>();
+        headers.setAll(headerContent);
+
+        Map<String, Object> body = new HashMap<>();
+        body.put("store_code", storeCode);
+        body.put("sign", sign);
+        body.put("f1", removeProductsRequest.getBarcodes().toArray());
+
+        HttpEntity<Map<String, Object>> entity = new HttpEntity<>(body, headers);
+
+        ResponseEntity<String> response = restTemplate.postForEntity(uri, entity, String.class);
+
+        return response.getStatusCode() == HttpStatus.OK;
     }
 
     @GetMapping(value = "/template/query")
+    @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
     @ResponseBody
     public List<HangerTemplate> queryTemplates() {
         return hangerService.queryTemplates();
     }
 
     @PostMapping(value = "/template/create")
+    @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
     Boolean createTemplate(@Valid @RequestBody CreateTemplateRequest createTemplateRequest) {
         return hangerService.createTemplate(createTemplateRequest);
     }
 
     @PostMapping(value = "/product/switch_template")
+    @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
     Boolean productSwitchTemplate(@Valid @RequestBody ProductSwitchTemplateRequest productSwitchTemplateRequest) {
         boolean localDataUpdated = hangerService.productSwitchTemplate(productSwitchTemplateRequest.getBarcodes(), productSwitchTemplateRequest.getTemplateId());
         if(localDataUpdated){
@@ -252,11 +311,13 @@ public class HangerController {
     }
 
     @PostMapping(value = "/template/remove")
+    @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
     Boolean removeTemplate(@Valid @RequestBody RemoveTemplatesRequest removeTemplatesRequest) {
         return hangerService.removeTemplates(removeTemplatesRequest);
     }
 
     @GetMapping(value = "/label/query")
+    @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
     public ResponseEntity<String> queryWoLinkLabelData(@RequestParam("size") int size,
                                                        @RequestParam("page") int page) {
 
@@ -283,6 +344,7 @@ public class HangerController {
     }
 
     @PostMapping(value = "/label/unbind")
+    @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
     Boolean unbindLabels(@Valid @RequestBody UnbindLabelsRequest unbindLabelsRequest) {
         final String uri = "http://n1.wolink.com.cn/api/HZADP/esl/unbind";
 
@@ -312,6 +374,7 @@ public class HangerController {
     }
 
     @PostMapping(value = "/label/sync_binding")
+    @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
     Boolean syncLabelBindings() {
         final String uri = "http://n1.wolink.com.cn/api/HZADP/esl/bind_task";
 
@@ -333,8 +396,9 @@ public class HangerController {
     }
 
     @PostMapping(value = "/label/bind")
-    Boolean bindLabels(@Valid @RequestBody BindLabelRequest bindLabelRequest) {
-        final String uri = "http://n1.wolink.com.cn/api/HZADP/esl/bind";
+    @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
+    Boolean bindLabels(@Valid @RequestBody BindLabelRequest bindLabelRequest)  {
+        final String uri = "http://n1.wolink.com.cn/api/HZADP/esl/bindMultiple";
 
         String productBarcode = bindLabelRequest.getProductBarcode();
         HangerProduct product = hangerService.queryProduct(productBarcode);
@@ -346,32 +410,43 @@ public class HangerController {
         String wl_21b_id = template.getWl_21b_id();
         List<String> labelCodes = bindLabelRequest.getLabelCodes();
 
-        boolean result = true;
+        RestTemplate restTemplate = new RestTemplate();
+//        ClientHttpRequestFactory requestFactory = new
+//                HttpComponentsClientHttpRequestFactory(HttpClients.createDefault());
+//        RestTemplate restTemplate = new RestTemplate(requestFactory);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Accept", MediaType.APPLICATION_JSON_VALUE);
+
+        Map<String, Object> body = new HashMap<>();
+        body.put("sign", sign);
+        body.put("store_code", storeCode);
+
+        List<Map<String, Object>> bindingInfos = new ArrayList<>();
 
         for(String labelCode: labelCodes){
-            RestTemplate restTemplate = new RestTemplate();
-
-            HttpHeaders headers = new HttpHeaders();
-            Map<String, String> headerContent = new HashMap<>();
-            headers.setAll(headerContent);
 
             String woLinktemplateID = wl_21b_id;
             if(labelCode.charAt(2) == '3') woLinktemplateID = wl_21r_id;
 
-            Map<String, Object> body = new HashMap<>();
-            body.put("store_code", storeCode);
-            body.put("sign", sign);
-            body.put("f1", labelCode);
-            body.put("f2", productBarcode);
-            body.put("f3", woLinktemplateID);
+            Map<String, Object> bindingInfo = new HashMap<>();
+            bindingInfo.put("esl_code", labelCode);
+            bindingInfo.put("product_code", productBarcode);
+            bindingInfo.put("esltemplate_id", woLinktemplateID);
 
-            System.out.println(body);
-
-            HttpEntity<Map<String, Object>> entity = new HttpEntity<>(body, headers);
-
-            ResponseEntity<String> response = restTemplate.postForEntity(uri, entity, String.class);
-            result = result && (response.getStatusCode() == HttpStatus.OK);
+            bindingInfos.add(bindingInfo);
         }
-        return result;
+
+        body.put("f1", bindingInfos.toArray());
+
+        System.out.println(new JSONObject(body));
+
+        HttpEntity<Map<String, Object>> entity = new HttpEntity<>(body, headers);
+        System.out.println(entity.getBody().toString());
+        ResponseEntity<String> response = restTemplate.postForEntity(uri, entity, String.class);
+
+        System.out.println(response);
+
+        return (response.getStatusCode() == HttpStatus.OK);
     }
 }

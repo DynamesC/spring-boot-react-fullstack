@@ -37,4 +37,14 @@ public class SignupRequest {
     public void setRole(Set<String> role) {
         this.role = role;
     }
+
+    public SignupRequest(){
+
+    }
+
+    public SignupRequest(@NotBlank @Size(min = 3, max = 20) String username, Set<String> role, @NotBlank String passwordMd5) {
+        this.username = username;
+        this.role = role;
+        this.passwordMd5 = passwordMd5;
+    }
 }
