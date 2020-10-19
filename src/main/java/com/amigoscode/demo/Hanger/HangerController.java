@@ -316,6 +316,20 @@ public class HangerController {
         return hangerService.removeTemplates(removeTemplatesRequest);
     }
 
+    @GetMapping(value = "template/query_wolink")
+    @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
+    ResponseEntity<String> queryWolinkTemplateData(){
+        int page = 1;
+        int size = 1000;
+        final String uri = String.format("http://n1.wolink.com.cn/api/HZADP/template/query?store_code=%s&f1=%d&f2=%d&sign=%s", storeCode, page, size, sign);
+
+        RestTemplate restTemplate = new RestTemplate();
+        MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
+        ResponseEntity<String> response = restTemplate.exchange(uri, HttpMethod.GET, new HttpEntity<Object>(headers), String.class);
+
+        return new ResponseEntity<>(response.getBody(), response.getStatusCode());
+    }
+
     @GetMapping(value = "/label/query")
     @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
     public ResponseEntity<String> queryWoLinkLabelData(@RequestParam("size") int size,
@@ -340,7 +354,7 @@ public class HangerController {
             e.printStackTrace();
         }
 //        return response;
-        return new ResponseEntity<>(response.getBody(), HttpStatus.OK);
+        return new ResponseEntity<>(response.getBody(), response.getStatusCode());
     }
 
     @PostMapping(value = "/label/unbind")
